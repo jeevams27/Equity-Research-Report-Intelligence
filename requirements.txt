@@ -1,0 +1,13 @@
+pymupdf
+pdfplumber
+sentence-transformers
+chromadb
+langchain
+langchain-groq
+langchain-community
+langchain-text-splitters
+streamlit
+python-dotenv
+groq
+google-generativeai
+Pillow
