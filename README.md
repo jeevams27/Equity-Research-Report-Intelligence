@@ -1,111 +1,144 @@
-# Equity Research Report Intelligence (Multimodal RAG)
+# Equity Research Report Intelligence
+
+### A Multimodal Retrieval-Augmented Generation (RAG) System for Equity Research Reports
 
 ## Overview
 
-A production-style Multimodal Retrieval-Augmented Generation (RAG)
-system for analyzing equity research reports. The application extracts
-and indexes **text**, **tables**, and **charts** from PDF reports,
-stores them in **ChromaDB**, and answers questions using **Groq Llama
-3.3** with support for **multi-document retrieval** and **cross-encoder
-reranking**.
+Equity research reports contain valuable information in multiple formats such as text, financial tables, and charts. Traditional RAG applications usually extract only text, which means important insights from tables and visualizations are often missed.
 
-## Features
+I built this project to explore how a multimodal RAG pipeline can understand all three content types while supporting questions across multiple equity research reports. The system extracts text, tables, and charts from PDF reports, stores them in a vector database, retrieves the most relevant information, reranks the results using a Cross-Encoder, and generates grounded answers with proper source citations.
 
--   Text extraction and semantic chunking
--   Table extraction using pdfplumber
--   Chart understanding using Gemini Vision
--   ChromaDB vector database
--   Multi-document search across reports
--   Duplicate upload prevention
--   Delete individual reports from the vector database
--   Report-level filtering
--   Cross-document comparison prompting
--   Two-stage retrieval:
-    -   Bi-Encoder (Sentence Transformers)
-    -   Cross-Encoder reranking (MS MARCO MiniLM)
+---
 
-## Architecture
+# Features
 
-``` text
-PDF Reports
-     │
-     ▼
-Text ─ Tables ─ Charts
-     │
-     ▼
-Embedding (all-MiniLM-L6-v2)
-     │
-     ▼
-ChromaDB
-     │
-     ▼
-Top-50 Candidate Retrieval
-     │
-     ▼
-Cross-Encoder Reranking
-     │
-     ▼
-Top-5 Relevant Chunks
-     │
-     ▼
-Groq Llama 3.3
-     │
-     ▼
-Final Answer with Source Citations
+- Extracts text from PDF reports and creates semantic chunks.
+- Extracts financial tables using pdfplumber.
+- Understands charts using Gemini Vision.
+- Stores embeddings in ChromaDB for semantic search.
+- Supports searching across multiple research reports.
+- Prevents duplicate report uploads.
+- Allows deleting individual reports from the vector database.
+- Supports filtering queries by a specific report.
+- Performs cross-document comparison.
+- Uses a two-stage retrieval pipeline with Cross-Encoder reranking for better retrieval quality.
+- Generates grounded answers with report and page citations.
+
+---
+
+# System Architecture
+
+```text
+                  PDF Research Reports
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+       Text           Tables          Charts
+          │               │               │
+          └───────────────┼───────────────┘
+                          │
+                 Embedding Generation
+            (all-MiniLM-L6-v2 Sentence Transformer)
+                          │
+                     Chroma Vector DB
+                          │
+               Retrieve Top-50 Candidates
+                          │
+         Cross-Encoder (MS MARCO MiniLM)
+                          │
+              Select Top-5 Relevant Chunks
+                          │
+                Groq Llama 3.3
+                          │
+         Grounded Answer with Source Citations
 ```
 
-## Tech Stack
+---
 
--   Python
--   Streamlit
--   ChromaDB
--   Sentence Transformers
--   CrossEncoder (MS MARCO MiniLM)
--   LangChain Text Splitters
--   PyMuPDF
--   pdfplumber
--   Google Gemini Vision
--   Groq API
+# Tech Stack
 
-## Project Layers
+- Python
+- Streamlit
+- ChromaDB
+- Sentence Transformers
+- Cross-Encoder (MS MARCO MiniLM)
+- LangChain Text Splitters
+- PyMuPDF
+- pdfplumber
+- Google Gemini Vision
+- Groq API
 
-### Layer 1 - Text RAG
+---
 
--   PDF text extraction
--   Recursive chunking
--   Embeddings
--   Vector storage
+# Project Layers
 
-### Layer 2 - Table Intelligence
+## Layer 1 – Text RAG
 
--   Table extraction
--   Markdown conversion
--   Table indexing
+The first layer focuses on extracting text from PDF reports, splitting it into semantic chunks, generating embeddings, and storing them inside ChromaDB for retrieval.
 
-### Layer 3 - Chart Intelligence
+**Key Features**
 
--   Exhibit detection
--   Chart cropping
--   Gemini Vision descriptions
--   Image indexing
+- PDF text extraction
+- Recursive chunking
+- Embedding generation
+- Vector storage
 
-### Layer 4 - Multi-Document Intelligence
+---
 
--   Duplicate prevention
--   Report management
--   Delete reports
--   Report filtering
--   Cross-document prompting
+## Layer 2 – Table Intelligence
 
-### Layer 5 - Retrieval Optimization
+Financial reports contain important information inside tables. This layer extracts those tables, converts them into markdown, and indexes them so they can be retrieved just like normal text.
 
--   Retrieve top 50 candidates
--   Cross-encoder reranking
--   Return top 5 most relevant chunks
+**Key Features**
 
-## Folder Structure
+- Table extraction
+- Markdown conversion
+- Table indexing
 
-``` text
+---
+
+## Layer 3 – Chart Intelligence
+
+Many important insights are presented as charts rather than text. This layer detects chart regions, crops them, generates descriptions using Gemini Vision, and stores those descriptions as searchable chunks.
+
+**Key Features**
+
+- Exhibit detection
+- Chart cropping
+- Gemini Vision descriptions
+- Image indexing
+
+---
+
+## Layer 4 – Multi-Document Intelligence
+
+This layer enables searching across multiple research reports instead of a single PDF. It also adds report management features such as duplicate prevention, deleting reports, filtering by report, and prompting the LLM to compare information across different documents.
+
+**Key Features**
+
+- Duplicate upload prevention
+- Report management
+- Delete reports
+- Report filtering
+- Cross-document prompting
+
+---
+
+## Layer 5 – Retrieval Optimization
+
+Instead of sending the first retrieved chunks directly to the LLM, the system first retrieves a larger candidate set and then reranks those candidates using a Cross-Encoder to improve retrieval quality.
+
+**Key Features**
+
+- Retrieve Top-50 candidate chunks
+- Cross-Encoder reranking
+- Return Top-5 most relevant chunks
+
+---
+
+# Folder Structure
+
+```text
 equity-research-rag/
 ├── app.py
 ├── ingestion.py
@@ -117,13 +150,39 @@ equity-research-rag/
 ├── sample_reports/
 └── README.md
 ```
-## Example Questions
 
--   Compare the target price and analyst rating for Infosys and TCS.
--   What is the revenue outlook for Infosys?
--   Summarize key risks mentioned in the TCS report.
--   Compare margin guidance across both reports.
+---
+# Example Questions
 
-## License
+## 1. Multi-Document Comparison
 
-This project is intended for learning, research, and portfolio purposes.
+**Question**
+
+> Compare the target price, analyst rating, revenue growth outlook, and key investment thesis for Infosys and TCS according to the uploaded HDFC Securities reports. Cite the source report and page number for every comparison.
+
+![Multi-Document Comparison](output1.png)
+
+---
+
+## 2. Multimodal Retrieval (Text + Tables + Charts)
+
+**Question**
+
+> Summarize the most important insights from the text, extracted tables, and chart descriptions for both Infosys and TCS. Clearly indicate whether each insight comes from text, a table, or a chart.
+
+![Multimodal Retrieval](output2.png)
+
+---
+
+## 3. Cross-Document Business Analysis
+
+**Question**
+
+> Based only on the uploaded reports, compare the business outlook, margin expectations, deal pipeline, AI initiatives, and growth drivers for Infosys and TCS. Support every point with citations.
+
+![Cross-Document Business Analysis](output3.png)
+
+---
+# License
+
+This project was built for learning, research, and portfolio purposes.
