@@ -146,8 +146,6 @@ equity-research-rag/
 ├── generation.py
 ├── config.py
 ├── requirements.txt
-├── chroma_db/
-├── sample_reports/
 └── README.md
 ```
 
